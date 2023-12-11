@@ -1,0 +1,64 @@
+#include <Adafruit_NeoPixel.h>
+
+#define PIN            6  // Define the pin where the Neopixel strip is connected
+#define NUMPIXELS      74 // Define the number of Neopixels in your strip
+#define BUTTON_PIN     2  // Define the pin where the push button is connected
+
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
+
+int buttonState = HIGH;    // variable for reading the pushbutton status
+int lastButtonState = HIGH; // variable to store the previous pushbutton status
+int nextPixel = 0;
+
+void setup() {
+  strip.begin();
+  strip.show(); // Initialize all pixels to 'off'
+  pinMode(BUTTON_PIN, INPUT);
+}
+
+void loop() {
+  buttonState = digitalRead(BUTTON_PIN);
+
+ // Check if the button is pressed and was not pressed before
+if (buttonState == LOW && lastButtonState == HIGH) {
+  // Get a random color
+  uint32_t color = strip.Color(random(256), random(256), random(256));
+
+  // Light up the current Neopixel with the random color
+  strip.setPixelColor(nextPixel, color);
+  strip.show();
+
+  // Move to the next Neopixel for the next button press
+  nextPixel = (nextPixel + 1) % NUMPIXELS;
+}
+
+  lastButtonState = buttonState;
+
+  // Check if all pixels are lit
+  if (nextPixel == NUMPIXELS - 1) {
+    // Run a fun light show for 10 seconds
+    runFunLightShow();
+
+    // Turn off all lights
+    strip.clear();
+    strip.show();
+    
+    // Reset the nextPixel counter
+    nextPixel = 0;
+  }
+}
+
+void runFunLightShow() {
+  // Run a fun light show for 10 seconds
+  unsigned long showStartTime = millis();
+  while (millis() - showStartTime < 10000) {
+    // Implement your fun light show pattern here
+    // For example, you can make all pixels change colors rapidly
+    for (int i = 0; i < NUMPIXELS; i++) {
+      uint32_t color = strip.Color(random(256), random(256), random(256));
+      strip.setPixelColor(i, color);
+    }
+    strip.show();
+    delay(100); // Adjust the delay based on your desired light show speed
+  }
+}
